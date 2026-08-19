@@ -25,6 +25,7 @@ export interface MapData {
   id: string;
   name: string;
   type: MapType;
+  icon?: string;
   members: string[]; // Array of user IDs
   ownerId: string;
   createdAt: Date;
@@ -50,6 +51,53 @@ export interface Pin {
 
 const COLLECTION_NAME = "pins";
 const MAPS_COLLECTION = "maps";
+const USERS_COLLECTION = "users";
+
+// ==========================================
+// Users Operations
+// ==========================================
+
+export interface UserProfile {
+  uid: string;
+  displayName: string | null;
+  photoURL: string | null;
+}
+
+export const updateUserDocument = async (uid: string, data: Partial<Omit<UserProfile, "uid">>) => {
+  try {
+    const userRef = doc(db, USERS_COLLECTION, uid);
+    // getDoc で存在チェックするか、merge: true で setDoc するのが定石
+    // ここでは updateDoc でエラーが出た場合（ドキュメントがない場合）にフォールバックするか、
+    // あるいは最初から setDoc(..., { merge: true }) を使う。
+    const { setDoc } = await import("firebase/firestore");
+    await setDoc(userRef, data, { merge: true });
+  } catch (error) {
+    console.error("Error updating user document: ", error);
+    throw error;
+  }
+};
+
+export const getUsersProfiles = async (uids: string[]): Promise<Record<string, UserProfile>> => {
+  if (!uids || uids.length === 0) return {};
+  try {
+    const usersRef = collection(db, USERS_COLLECTION);
+    const q = query(usersRef, where("__name__", "in", uids));
+    const querySnapshot = await getDocs(q);
+    const profiles: Record<string, UserProfile> = {};
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      profiles[doc.id] = {
+        uid: doc.id,
+        displayName: data.displayName || null,
+        photoURL: data.photoURL || null,
+      };
+    });
+    return profiles;
+  } catch (error) {
+    console.error("Error getting user profiles: ", error);
+    throw error;
+  }
+};
 
 // ==========================================
 // Maps Operations
@@ -78,6 +126,7 @@ export const getMap = async (mapId: string): Promise<MapData | null> => {
         id: snap.id,
         name: data.name,
         type: data.type,
+        icon: data.icon,
         members: data.members || [],
         ownerId: data.ownerId,
         createdAt: data.createdAt ? (data.createdAt as Timestamp).toDate() : new Date(),
@@ -98,6 +147,19 @@ export const joinMap = async (mapId: string, userId: string) => {
     });
   } catch (error) {
     console.error("Error joining map: ", error);
+    throw error;
+  }
+};
+
+export const removeMemberFromMap = async (mapId: string, userId: string, currentMembers: string[]) => {
+  try {
+    const mapRef = doc(db, MAPS_COLLECTION, mapId);
+    const newMembers = currentMembers.filter(id => id !== userId);
+    await updateDoc(mapRef, {
+      members: newMembers
+    });
+  } catch (error) {
+    console.error("Error removing member from map: ", error);
     throw error;
   }
 };
@@ -155,6 +217,7 @@ export const subscribeToUserMaps = (userId: string, callback: (maps: MapData[]) 
         id: doc.id,
         name: data.name,
         type: data.type,
+        icon: data.icon,
         members: data.members || [],
         ownerId: data.ownerId,
         createdAt: data.createdAt ? (data.createdAt as Timestamp).toDate() : new Date(),

@@ -5,22 +5,26 @@ import InfoModal, { InfoType } from "./InfoModal";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
-import SettingsModal from "./SettingsModal";
+
 import { auth } from "@/lib/firebase/config";
 import { signOut } from "firebase/auth";
+import AdBanner from "./AdBanner";
+import { MapData, UserProfile } from "@/lib/firebase/firestore";
 
 interface MenuDrawerProps {
   mapId: string;
+  mapData?: MapData | null;
+  userProfiles?: Record<string, UserProfile>;
   isOpen: boolean;
   onClose: () => void;
   onOpenList: (tab: "want_to_go" | "have_been") => void;
   onOpenRecent: () => void;
 }
 
-export default function MenuDrawer({ mapId, isOpen, onClose, onOpenList, onOpenRecent }: MenuDrawerProps) {
+export default function MenuDrawer({ mapId, mapData, userProfiles, isOpen, onClose, onOpenList, onOpenRecent }: MenuDrawerProps) {
   const [copied, setCopied] = useState(false);
   const [infoModalType, setInfoModalType] = useState<InfoType>(null);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+
   const { user } = useAuth();
 
   const handleSignOut = async () => {
@@ -96,8 +100,48 @@ export default function MenuDrawer({ mapId, isOpen, onClose, onOpenList, onOpenR
         </div>
 
         <nav className="flex-1 overflow-y-auto py-2">
+          {mapData && (
+            <div className="px-4 py-3 mb-2">
+              <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">メンバー ({mapData.members?.length || 0}人)</h3>
+              <div className="flex flex-wrap gap-2">
+                {mapData.members?.map(uid => {
+                  const profile = userProfiles?.[uid];
+                  return (
+                    <div key={uid} className="flex items-center gap-2 bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-full py-1 pr-3 pl-1">
+                      <div className="w-6 h-6 rounded-full bg-slate-200 overflow-hidden flex-shrink-0">
+                        {profile?.photoURL ? (
+                          <img src={profile.photoURL} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-indigo-100 text-indigo-700 text-[10px] font-bold">
+                            {(profile?.displayName || "?").charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-xs font-medium truncate max-w-[80px]">{profile?.displayName || "ユーザー"}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div className="border-t border-gray-200 dark:border-gray-800 mx-4 mb-2"></div>
+
           <ul className="flex flex-col gap-1 px-2">
             
+            <li>
+              <Link 
+                href="/dashboard"
+                onClick={onClose}
+                className="group w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors text-left"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 group-hover:text-black dark:group-hover:text-white transition-colors">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                </svg>
+                <span className="font-medium text-sm text-gray-700 dark:text-gray-200">ダッシュボードへ戻る</span>
+              </Link>
+            </li>
+
             <li>
               <button 
                 onClick={() => {
@@ -209,11 +253,9 @@ export default function MenuDrawer({ mapId, isOpen, onClose, onOpenList, onOpenR
               <div className="my-2 border-t border-gray-200 dark:border-gray-800 mx-4"></div>
               <ul className="flex flex-col gap-1 px-2 mb-4">
                 <li>
-                  <button 
-                    onClick={() => {
-                      setIsSettingsModalOpen(true);
-                      onClose();
-                    }}
+                  <Link 
+                    href="/settings"
+                    onClick={onClose}
                     className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors text-left"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500">
@@ -221,7 +263,7 @@ export default function MenuDrawer({ mapId, isOpen, onClose, onOpenList, onOpenR
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                     <span className="font-medium text-sm text-gray-700 dark:text-gray-200">設定</span>
-                  </button>
+                  </Link>
                 </li>
                 <li>
                   <button 
@@ -237,6 +279,11 @@ export default function MenuDrawer({ mapId, isOpen, onClose, onOpenList, onOpenR
               </ul>
             </>
           )}
+
+          {/* 広告エリア（メニュー下部） */}
+          <div className="mt-auto px-4 pb-6 pt-4">
+            <AdBanner type="square" />
+          </div>
         </nav>
       </div>
 
@@ -246,11 +293,7 @@ export default function MenuDrawer({ mapId, isOpen, onClose, onOpenList, onOpenR
         onClose={() => setInfoModalType(null)} 
       />
 
-      {/* Settings Modal */}
-      <SettingsModal
-        isOpen={isSettingsModalOpen}
-        onClose={() => setIsSettingsModalOpen(false)}
-      />
+
     </>
   );
 }

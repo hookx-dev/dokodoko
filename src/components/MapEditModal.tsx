@@ -2,7 +2,8 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 
 import { useState, useEffect } from "react";
-import { MapData, MapType, updateMap, deleteMap } from "@/lib/firebase/firestore";
+import { MapData, MapType, updateMap, deleteMap, removeMemberFromMap, getUsersProfiles, UserProfile } from "@/lib/firebase/firestore";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface MapEditModalProps {
   isOpen: boolean;
@@ -13,14 +14,35 @@ interface MapEditModalProps {
 export default function MapEditModal({ isOpen, onClose, mapData }: MapEditModalProps) {
   const [name, setName] = useState("");
   const [type, setType] = useState<MapType>("personal");
+  const [icon, setIcon] = useState("🗺️");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userProfiles, setUserProfiles] = useState<Record<string, UserProfile>>({});
+
+  const AVAILABLE_ICONS = [
+    "🗺️", "🎢", "🎳", "🎮",
+    "⛩️", "🗼", "🏯", "🗻",
+    "🛍️", "🛒", "🏬", "🏪",
+    "🍽️", "🍣", "🍔", "☕",
+    "🍻", "🏨", "🏕️", "♨️",
+    "🚗", "🚲", "❤️", "🌟"
+  ];
   const [copied, setCopied] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [showConfirmLeave, setShowConfirmLeave] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (mapData) {
       setName(mapData.name);
       setType(mapData.type);
+      setIcon(mapData.icon || "🗺️");
+      
+      // メンバーのプロフィールを取得
+      if (mapData.members && mapData.members.length > 0) {
+        getUsersProfiles(mapData.members).then(profiles => {
+          setUserProfiles(profiles);
+        });
+      }
     }
   }, [mapData]);
 
@@ -35,6 +57,7 @@ export default function MapEditModal({ isOpen, onClose, mapData }: MapEditModalP
       await updateMap(mapData.id, {
         name: name.trim(),
         type,
+        icon,
       });
       onClose();
     } catch (error) {
@@ -58,6 +81,20 @@ export default function MapEditModal({ isOpen, onClose, mapData }: MapEditModalP
     }
   };
 
+  const handleLeaveMap = async () => {
+    if (!user) return;
+    try {
+      setIsSubmitting(true);
+      await removeMemberFromMap(mapData.id, user.uid, mapData.members);
+      onClose();
+    } catch (error) {
+      console.error(error);
+      alert("地図からの退出に失敗しました");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleCopyLink = async () => {
     try {
       const url = `${window.location.origin}/join/${mapData.id}`;
@@ -72,7 +109,7 @@ export default function MapEditModal({ isOpen, onClose, mapData }: MapEditModalP
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
       <div 
-        className="bg-white dark:bg-zinc-900 rounded-2xl p-6 w-full max-w-md shadow-2xl transform transition-all relative"
+        className="bg-white dark:bg-zinc-900 rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all relative"
         onClick={(e) => e.stopPropagation()}
       >
         <button 
@@ -113,6 +150,35 @@ export default function MapEditModal({ isOpen, onClose, mapData }: MapEditModalP
               </button>
             </div>
           </div>
+        ) : showConfirmLeave ? (
+          <div className="flex flex-col items-center justify-center py-6 text-center animate-in fade-in zoom-in duration-200">
+            <div className="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 text-orange-600 rounded-full flex items-center justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-8 h-8">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M22 10.5h-6m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold mb-2">パートナー連携を解除しますか？</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">
+              「{mapData.name}」のメンバーからあなた自身を削除します。<br/>
+              これ以降、あなたはこの地図にアクセスできなくなります。
+            </p>
+            <div className="flex w-full gap-3">
+              <button
+                onClick={() => setShowConfirmLeave(false)}
+                disabled={isSubmitting}
+                className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold transition-colors disabled:opacity-50"
+              >
+                キャンセル
+              </button>
+              <button
+                onClick={handleLeaveMap}
+                disabled={isSubmitting}
+                className="flex-1 px-4 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold shadow-md shadow-orange-500/20 transition-colors disabled:opacity-50"
+              >
+                {isSubmitting ? "解除中..." : "解除して退出する"}
+              </button>
+            </div>
+          </div>
         ) : (
           <>
             <h2 className="text-2xl font-bold mb-6 pr-8">地図の設定</h2>
@@ -133,25 +199,50 @@ export default function MapEditModal({ isOpen, onClose, mapData }: MapEditModalP
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  地図の種類
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  地図のアイコン
                 </label>
-                <div className="grid grid-cols-3 gap-3">
-                  <label className={`border rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer transition-colors ${type === 'personal' ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30' : 'border-gray-200 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800'}`}>
-                    <input type="radio" className="hidden" checked={type === 'personal'} onChange={() => setType('personal')} />
-                    <span className="text-2xl mb-1">🧭</span>
-                    <span className="text-xs font-semibold text-gray-900 dark:text-gray-300">個人用</span>
-                  </label>
-                  <label className={`border rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer transition-colors ${type === 'partner' ? 'border-pink-500 bg-pink-50 dark:bg-pink-900/30' : 'border-gray-200 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800'}`}>
-                    <input type="radio" className="hidden" checked={type === 'partner'} onChange={() => setType('partner')} />
-                    <span className="text-2xl mb-1">❤️</span>
-                    <span className="text-xs font-semibold text-gray-900 dark:text-gray-300">パートナー</span>
-                  </label>
-                  <label className={`border rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer transition-colors ${type === 'friends' ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/30' : 'border-gray-200 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800'}`}>
-                    <input type="radio" className="hidden" checked={type === 'friends'} onChange={() => setType('friends')} />
-                    <span className="text-2xl mb-1">🍻</span>
-                    <span className="text-xs font-semibold text-gray-900 dark:text-gray-300">友達</span>
-                  </label>
+                <div className="grid grid-cols-6 gap-2">
+                  {AVAILABLE_ICONS.map((i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setIcon(i)}
+                      className={`text-2xl py-2 rounded-xl border-2 transition-all ${icon === i ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 scale-110' : 'border-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 hover:scale-110'}`}
+                    >
+                      {i}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  参加しているメンバー
+                </label>
+                <div className="flex flex-col gap-3 max-h-40 overflow-y-auto pr-2">
+                  {mapData.members?.map(uid => {
+                    const profile = userProfiles[uid];
+                    return (
+                      <div key={uid} className="flex items-center justify-between bg-slate-50 dark:bg-zinc-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-zinc-800/50">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-zinc-700 overflow-hidden flex-shrink-0">
+                            {profile?.photoURL ? (
+                              <img src={profile.photoURL} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-indigo-100 text-indigo-700 text-sm font-bold">
+                                {(profile?.displayName || "ユ").charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                          </div>
+                          <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                            {profile?.displayName || "名無しユーザー"}
+                            {uid === user?.uid && <span className="ml-2 text-xs text-indigo-500 font-semibold bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded">あなた</span>}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -177,7 +268,19 @@ export default function MapEditModal({ isOpen, onClose, mapData }: MapEditModalP
               </div>
             </form>
 
-            <div className="mt-8 pt-4 border-t border-red-100 dark:border-red-900/30">
+            <div className="mt-8 pt-4 border-t border-gray-100 dark:border-zinc-800 flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={() => setShowConfirmLeave(true)}
+                disabled={isSubmitting}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-xl font-bold transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M22 10.5h-6m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
+                </svg>
+                パートナー連携を解除する (退出)
+              </button>
+              
               <button
                 type="button"
                 onClick={() => setShowConfirmDelete(true)}

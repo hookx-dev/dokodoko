@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useAuth } from "@/contexts/AuthContext";
-import { getMap, MapData } from "@/lib/firebase/firestore";
+import { getMap, MapData, getUsersProfiles, UserProfile } from "@/lib/firebase/firestore";
 import Header from "@/components/Header";
 import MenuDrawer from "@/components/MenuDrawer";
 import RecentListView from "@/components/RecentListView";
@@ -18,6 +18,7 @@ export default function MapPage() {
   const mapId = params?.mapId || "default";
   const { user, loading: authLoading } = useAuth();
   const [mapData, setMapData] = useState<MapData | null>(null);
+  const [userProfiles, setUserProfiles] = useState<Record<string, UserProfile>>({});
   const [isListOpen, setIsListOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isRecentOpen, setIsRecentOpen] = useState(false);
@@ -45,7 +46,11 @@ export default function MapPage() {
           return;
         }
         
-        
+        // メンバーのプロフィール情報を取得
+        if (data.members.length > 0) {
+          const profiles = await getUsersProfiles(data.members);
+          setUserProfiles(profiles);
+        }
       } catch (error) {
         console.error(error);
         router.push("/");
@@ -78,6 +83,7 @@ export default function MapPage() {
         <Header 
           title={mapData?.name || "マップ"} 
           type={mapData?.type} 
+          icon={mapData?.icon}
           memberCount={mapData?.members?.length} 
         />
       </div>
@@ -161,6 +167,8 @@ export default function MapPage() {
           
           <MenuDrawer 
             mapId={mapId}
+            mapData={mapData}
+            userProfiles={userProfiles}
             isOpen={isMenuOpen} 
             onClose={() => setIsMenuOpen(false)} 
             onOpenList={handleOpenList} 

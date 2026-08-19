@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import AuthModal from "@/components/AuthModal";
 import Footer from "@/components/Footer";
-
+import AdBanner from "@/components/AdBanner";
 import Logo from "@/components/Logo";
 
 export default function LandingPage() {
@@ -124,7 +124,7 @@ export default function LandingPage() {
             
             <p className="mt-6 text-xl text-slate-800 dark:text-slate-200 max-w-2xl mx-auto leading-relaxed font-medium">
               一人旅の記録、友人との旅行計画、そして大切なパートナーとの共有。
-              あなただけのプライベートな地図を作成し、特別な場所を記録しましょう。
+              「DokoDoko」は、あなただけのプライベートな地図を作成し、特別な場所を記録・共有できる新しいマップアプリです。
             </p>
             
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -150,43 +150,95 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             {/* Feature 1 */}
-            <div className="bg-white dark:bg-zinc-800/80 p-8 rounded-3xl shadow-sm border border-slate-100 dark:border-zinc-700/50 hover:shadow-xl transition-shadow group">
-              <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mb-6 transform group-hover:scale-110 transition-transform">
-                <span className="text-3xl">🧭</span>
+            <div className="bg-white dark:bg-zinc-800/80 p-8 rounded-3xl shadow-sm border border-slate-100 dark:border-zinc-700/50 hover:shadow-xl transition-all group">
+              <div className="w-14 h-14 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center mb-6 transform group-hover:-translate-y-2 transition-transform">
+                <span className="text-3xl">🤝</span>
               </div>
-              <h3 className="text-xl font-bold mb-3">一人旅の記録に</h3>
-              <p className="text-slate-600 dark:text-slate-400">
-                訪れた絶景スポットや美味しかったお店をピン留め。あなただけの旅行記が地図上に完成します。
+              <h3 className="text-xl font-bold mb-3">誰とでも、いくつでも共有</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                旅行仲間との共有マップ、恋人とのデートスポットまとめ、自分だけの秘密のカフェリストなど、目的別に複数の地図を作成できます。
               </p>
             </div>
 
             {/* Feature 2 */}
-            <div className="bg-white dark:bg-zinc-800/80 p-8 rounded-3xl shadow-sm border border-slate-100 dark:border-zinc-700/50 hover:shadow-xl transition-shadow group">
-              <div className="w-14 h-14 bg-pink-100 dark:bg-pink-900/30 rounded-2xl flex items-center justify-center mb-6 transform group-hover:scale-110 transition-transform">
-                <span className="text-3xl">❤️</span>
+            <div className="bg-white dark:bg-zinc-800/80 p-8 rounded-3xl shadow-sm border border-slate-100 dark:border-zinc-700/50 hover:shadow-xl transition-all group">
+              <div className="w-14 h-14 bg-pink-100 dark:bg-pink-900/30 rounded-2xl flex items-center justify-center mb-6 transform group-hover:-translate-y-2 transition-transform">
+                <span className="text-3xl">📸</span>
               </div>
-              <h3 className="text-xl font-bold mb-3">大切なパートナーと共有</h3>
-              <p className="text-slate-600 dark:text-slate-400">
-                URLを共有するだけで、2人だけの秘密の地図に。これから「いきたい」場所もリストアップできます。
+              <h3 className="text-xl font-bold mb-3">写真と一緒に思い出を記録</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                気になった場所を検索してピン留め。その場所で撮った写真をアップロードすれば、地図を眺めるだけで思い出が鮮明に蘇ります。
               </p>
             </div>
 
             {/* Feature 3 */}
-            <div className="bg-white dark:bg-zinc-800/80 p-8 rounded-3xl shadow-sm border border-slate-100 dark:border-zinc-700/50 hover:shadow-xl transition-shadow group">
-              <div className="w-14 h-14 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center mb-6 transform group-hover:scale-110 transition-transform">
-                <span className="text-3xl">📸</span>
+            <div className="bg-white dark:bg-zinc-800/80 p-8 rounded-3xl shadow-sm border border-slate-100 dark:border-zinc-700/50 hover:shadow-xl transition-all group">
+              <div className="w-14 h-14 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center mb-6 transform group-hover:-translate-y-2 transition-transform">
+                <span className="text-3xl">📱</span>
               </div>
-              <h3 className="text-xl font-bold mb-3">写真と一緒に思い出を</h3>
-              <p className="text-slate-600 dark:text-slate-400">
-                ピンには画像をアップロード可能。地図上のピンをクリックするだけで、その日の思い出が鮮明に蘇ります。
+              <h3 className="text-xl font-bold mb-3">スマホアプリとしても使える</h3>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                ブラウザから「ホーム画面に追加」するだけで、ネイティブアプリのように全画面でサクサク動作。インストール不要ですぐに使えます。
               </p>
             </div>
           </div>
         </div>
       </section>
 
+      {/* Use Cases Section */}
+      <section className="relative py-24 bg-white dark:bg-black scroll-mt-20">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-2xl font-bold tracking-tight sm:text-4xl text-slate-900 dark:text-white">こんなシーンで大活躍</h2>
+            <p className="mt-4 text-base md:text-lg text-slate-600 dark:text-slate-400">アイデア次第で、DokoDokoの使い方は無限大</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+            <div className="flex gap-6 items-start">
+              <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-zinc-900 flex items-center justify-center text-3xl flex-shrink-0 border border-slate-100 dark:border-zinc-800">
+                ❤️
+              </div>
+              <div>
+                <h4 className="text-xl font-bold mb-2">カップルのデートマップ</h4>
+                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">「次ここ行きたいね！」テレビやSNSで見つけた気になるスポットを2人でピン留め。週末のデート先選びがもっと楽しくなります。</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-6 items-start">
+              <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-zinc-900 flex items-center justify-center text-3xl flex-shrink-0 border border-slate-100 dark:border-zinc-800">
+                ✈️
+              </div>
+              <div>
+                <h4 className="text-xl font-bold mb-2">グループ旅行のしおり</h4>
+                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">旅行先の観光名所やホテル、レストランを事前にマッピング。リンクを共有するだけで、全員が同じ地図を見ながら旅行を楽しめます。</p>
+              </div>
+            </div>
+
+            <div className="flex gap-6 items-start">
+              <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-zinc-900 flex items-center justify-center text-3xl flex-shrink-0 border border-slate-100 dark:border-zinc-800">
+                ☕
+              </div>
+              <div>
+                <h4 className="text-xl font-bold mb-2">自分だけのお店リスト</h4>
+                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">美味しかったカフェや、また行きたい居酒屋を自分用にメモ。「あの辺で良いお店あったっけ？」という時も、地図からすぐに探せます。</p>
+              </div>
+            </div>
+
+            <div className="flex gap-6 items-start">
+              <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-zinc-900 flex items-center justify-center text-3xl flex-shrink-0 border border-slate-100 dark:border-zinc-800">
+                🏕️
+              </div>
+              <div>
+                <h4 className="text-xl font-bold mb-2">趣味の記録（キャンプ・御朱印など）</h4>
+                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">制覇したキャンプ場や、巡った神社の御朱印記録にも最適。アイコンのカスタマイズ機能で、あなたらしい趣味の地図が作れます。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* How to Use Section */}
-      <section id="how-to-use" className="relative py-24 bg-white dark:bg-black scroll-mt-20 border-t border-slate-200 dark:border-zinc-800">
+      <section id="how-to-use" className="relative py-24 bg-slate-50 dark:bg-zinc-900/50 scroll-mt-20 border-t border-slate-200 dark:border-zinc-800">
         {/* Removed background map here to create contrast and clear separation between sections */}
         
         <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8">
@@ -230,6 +282,13 @@ export default function LandingPage() {
               今すぐ始める
             </button>
           </div>
+        </div>
+      </section>
+
+      {/* 広告エリア（LP下部） */}
+      <section className="py-12 bg-white dark:bg-black border-t border-slate-100 dark:border-zinc-800/50">
+        <div className="max-w-4xl mx-auto px-6">
+          <AdBanner type="horizontal" />
         </div>
       </section>
 

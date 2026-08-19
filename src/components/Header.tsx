@@ -12,10 +12,11 @@ import Image from "next/image";
 interface HeaderProps {
   title?: string;
   type?: MapType;
+  icon?: string;
   memberCount?: number;
 }
 
-export default function Header({ title, type, memberCount }: HeaderProps = {}) {
+export default function Header({ title, type, icon, memberCount }: HeaderProps = {}) {
   const { user, loading } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -45,9 +46,9 @@ export default function Header({ title, type, memberCount }: HeaderProps = {}) {
 
           {title && (
             <div className="absolute left-1/2 transform -translate-x-1/2 hidden md:flex items-center gap-3 w-[50%] justify-center">
-              {type && (
+              {(icon || type) && (
                 <div className="flex shrink-0 items-center justify-center w-10 h-10 bg-slate-100 dark:bg-zinc-800 rounded-xl shadow-sm text-xl">
-                  {type === "personal" ? "🧭" : type === "partner" ? "❤️" : type === "friends" ? "🍻" : "🗺️"}
+                  {icon ? icon : type === "personal" ? "🧭" : type === "partner" ? "❤️" : type === "friends" ? "🍻" : "🗺️"}
                 </div>
               )}
               <div className="flex flex-col min-w-0">
@@ -76,7 +77,7 @@ export default function Header({ title, type, memberCount }: HeaderProps = {}) {
                 </span>
                 <button 
                   onClick={handleSignOut}
-                  className="text-sm md:text-lg font-medium text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white"
+                  className="text-sm md:text-lg font-medium text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-2 md:ml-4"
                 >
                   ログアウト
                 </button>

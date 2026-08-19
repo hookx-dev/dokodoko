@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
-import { subscribeToUserMaps, MapData, createMap, MapType } from "@/lib/firebase/firestore";
+import { subscribeToUserMaps, MapData, createMap, MapType, getUsersProfiles, UserProfile } from "@/lib/firebase/firestore";
 import Header from "@/components/Header";
 import MapEditModal from "@/components/MapEditModal";
+import AdBanner from "@/components/AdBanner";
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
@@ -17,6 +18,17 @@ export default function DashboardPage() {
   const [newMapType, setNewMapType] = useState<MapType>("personal");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingMap, setEditingMap] = useState<MapData | null>(null);
+  const [newMapIcon, setNewMapIcon] = useState("🗺️");
+  const [userProfiles, setUserProfiles] = useState<Record<string, UserProfile>>({});
+
+  const AVAILABLE_ICONS = [
+    "🗺️", "🎢", "🎳", "🎮",
+    "⛩️", "🗼", "🏯", "🗻",
+    "🛍️", "🛒", "🏬", "🏪",
+    "🍽️", "🍣", "🍔", "☕",
+    "🍻", "🏨", "🏕️", "♨️",
+    "🚗", "🚲", "❤️", "🌟"
+  ];
 
   useEffect(() => {
     if (!loading && !user) {
@@ -26,8 +38,14 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!user) return;
-    const unsubscribe = subscribeToUserMaps(user.uid, (data) => {
+    const unsubscribe = subscribeToUserMaps(user.uid, async (data) => {
       setMaps(data);
+      const uids = new Set<string>();
+      data.forEach(map => map.members?.forEach(uid => uids.add(uid)));
+      if (uids.size > 0) {
+        const profiles = await getUsersProfiles(Array.from(uids));
+        setUserProfiles(profiles);
+      }
     });
     return () => unsubscribe();
   }, [user]);
@@ -41,6 +59,7 @@ export default function DashboardPage() {
       const mapId = await createMap({
         name: newMapName.trim(),
         type: newMapType,
+        icon: newMapIcon,
         members: [user.uid],
         ownerId: user.uid,
       });
@@ -130,21 +149,33 @@ export default function DashboardPage() {
               >
                 <div className="flex justify-between items-start mb-4">
                   <div className="w-12 h-12 bg-slate-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-                    {getTypeIcon(map.type)}
+                    {map.icon || "🗺️"}
                   </div>
-                  <span className="text-xs font-medium px-2.5 py-1 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-400 rounded-full">
-                    {getTypeName(map.type)}
-                  </span>
                 </div>
                 <h3 className="text-xl font-bold mb-1 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                   {map.name}
                 </h3>
                 <div className="flex items-center justify-between mt-4">
-                  <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                      <path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 5.963-2.06.438-.398.81-.84.41-1.412A11.98 11.98 0 0010 12a11.98 11.98 0 00-6.535 2.493z" />
-                    </svg>
-                    <span>メンバー {map.members?.length || 1}人</span>
+                  <div className="flex items-center gap-2">
+                    <div className="flex -space-x-2">
+                      {map.members?.map((uid) => {
+                        const profile = userProfiles[uid];
+                        return (
+                          <div key={uid} className="w-7 h-7 rounded-full bg-slate-200 border-2 border-white dark:border-zinc-900 overflow-hidden flex-shrink-0" title={profile?.displayName || "ユーザー"}>
+                            {profile?.photoURL ? (
+                              <img src={profile.photoURL} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-indigo-100 text-indigo-700 text-[10px] font-bold">
+                                {(profile?.displayName || "?").charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <span className="text-sm text-slate-500 dark:text-slate-400 ml-1">
+                      {map.members?.length || 1}人
+                    </span>
                   </div>
                   
                   {map.ownerId === user.uid && (
@@ -163,6 +194,11 @@ export default function DashboardPage() {
             ))}
           </div>
         )}
+
+        {/* 広告エリア（ダッシュボード下部） */}
+        <div className="mt-12">
+          <AdBanner type="horizontal" />
+        </div>
       </main>
 
       <MapEditModal
@@ -174,7 +210,7 @@ export default function DashboardPage() {
       {/* 新規作成モーダル */}
       {isCreating && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl p-8 w-full max-w-md shadow-2xl relative animate-in fade-in zoom-in duration-200">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl p-8 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl relative animate-in fade-in zoom-in duration-200">
             <button 
               onClick={() => setIsCreating(false)}
               className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white bg-slate-100 dark:bg-zinc-800 rounded-full"
@@ -196,23 +232,18 @@ export default function DashboardPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold mb-3 text-slate-700 dark:text-slate-300">地図の種類</label>
-                <div className="grid grid-cols-3 gap-3">
-                  <label className={`cursor-pointer border-2 rounded-xl p-3 flex flex-col items-center gap-2 transition-all ${newMapType === 'personal' ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10' : 'border-slate-200 dark:border-zinc-700 hover:border-indigo-300'}`}>
-                    <input type="radio" className="hidden" checked={newMapType === 'personal'} onChange={() => setNewMapType('personal')} />
-                    <span className="text-2xl">🧭</span>
-                    <span className="text-xs font-bold">個人用</span>
-                  </label>
-                  <label className={`cursor-pointer border-2 rounded-xl p-3 flex flex-col items-center gap-2 transition-all ${newMapType === 'partner' ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10' : 'border-slate-200 dark:border-zinc-700 hover:border-indigo-300'}`}>
-                    <input type="radio" className="hidden" checked={newMapType === 'partner'} onChange={() => setNewMapType('partner')} />
-                    <span className="text-2xl">❤️</span>
-                    <span className="text-xs font-bold">パートナー</span>
-                  </label>
-                  <label className={`cursor-pointer border-2 rounded-xl p-3 flex flex-col items-center gap-2 transition-all ${newMapType === 'friends' ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10' : 'border-slate-200 dark:border-zinc-700 hover:border-indigo-300'}`}>
-                    <input type="radio" className="hidden" checked={newMapType === 'friends'} onChange={() => setNewMapType('friends')} />
-                    <span className="text-2xl">🍻</span>
-                    <span className="text-xs font-bold">友達</span>
-                  </label>
+                <label className="block text-sm font-bold mb-3 text-slate-700 dark:text-slate-300">地図のアイコン</label>
+                <div className="grid grid-cols-6 gap-2">
+                  {AVAILABLE_ICONS.map((icon) => (
+                    <button
+                      key={icon}
+                      type="button"
+                      onClick={() => setNewMapIcon(icon)}
+                      className={`text-2xl py-2 rounded-xl border-2 transition-all ${newMapIcon === icon ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 scale-110' : 'border-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 hover:scale-110'}`}
+                    >
+                      {icon}
+                    </button>
+                  ))}
                 </div>
               </div>
 
