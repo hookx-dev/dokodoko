@@ -27,12 +27,12 @@ export const metadata: Metadata = {
     statusBarStyle: 'default',
     title: 'DokoDoko',
   },
-  metadataBase: new URL('http://localhost:3000'), // TODO: 本番公開時にドメインを変更
-  title: 'DokoDoko - ふたりの思い出をひとつの地図に。',
-  description: '一人旅の記録、友人との旅行計画、大切なパートナーとの共有。あなただけのプライベートな地図を作成しましょう。',
+  metadataBase: new URL('https://dokodoko.pages.dev'),
+  title: 'DokoDoko - カップルや友達と思い出の場所を共有するプライベートマップアプリ',
+  description: 'カップルのデートプラン作りや友人との旅行計画に最適！一緒に行きたい場所や思い出のスポットをGoogleマップ上にピン留めしてリアルタイム共有できる、招待制の完全無料マップ作成アプリです。',
   openGraph: {
-    title: 'DokoDoko - ふたりの思い出をひとつの地図に。',
-    description: '一人旅の記録、友人との旅行計画、大切なパートナーとの共有。あなただけのプライベートな地図を作成しましょう。',
+    title: 'DokoDoko - カップルや友達とつくる共有マップ',
+    description: 'デートプランや旅行計画を地図で共有。行きたい場所や思い出のスポットをみんなでピン留めしよう！',
     url: '/',
     siteName: 'DokoDoko',
     images: [
@@ -48,8 +48,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'DokoDoko - ふたりの思い出をひとつの地図に。',
-    description: 'あなただけのプライベートな地図を作成し、特別な場所を記録しましょう。',
+    title: 'DokoDoko - カップルや友達とつくる共有マップ',
+    description: 'デートプラン作りや旅行計画に。一緒に行きたい場所を地図にピン留めして共有しよう！',
     images: ['/ogp.jpg'],
   },
 };

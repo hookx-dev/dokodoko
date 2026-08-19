@@ -115,16 +115,16 @@ export default function LandingPage() {
         <div className="relative z-10 max-w-4xl mx-auto px-6 lg:px-8 text-center mt-12">
           {/* Glassmorphism Container for Readability */}
           <div className="bg-white/70 dark:bg-black/60 backdrop-blur-md rounded-3xl p-6 md:p-12 shadow-2xl border border-white/50 dark:border-zinc-700/50">
-            <h1 className="text-4xl md:text-7xl font-extrabold tracking-tight mb-6 md:mb-8 drop-shadow-sm leading-tight">
+            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 md:mb-8 drop-shadow-sm leading-tight">
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
-                ふたりの思い出を、
+                カップルや友達とつくる
               </span>
-              <span className="block mt-2 text-slate-900 dark:text-white">ひとつの地図に。</span>
+              <span className="block mt-2 text-slate-900 dark:text-white">共有マップアプリ</span>
             </h1>
             
-            <p className="mt-6 text-xl text-slate-800 dark:text-slate-200 max-w-2xl mx-auto leading-relaxed font-medium">
-              一人旅の記録、友人との旅行計画、そして大切なパートナーとの共有。
-              「DokoDoko」は、あなただけのプライベートな地図を作成し、特別な場所を記録・共有できる新しいマップアプリです。
+            <p className="mt-6 text-lg md:text-xl text-slate-800 dark:text-slate-200 max-w-2xl mx-auto leading-relaxed font-medium">
+              週末のデートプラン作り、友達との旅行計画、そして大切な人との思い出の記録に。
+              「DokoDoko」は、行きたい場所をGoogleマップ上にピン留めしてリアルタイムに共有できる、完全無料のプライベート地図アプリです。
             </p>
             
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center">
