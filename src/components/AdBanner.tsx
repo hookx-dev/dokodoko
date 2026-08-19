@@ -19,6 +19,9 @@ export default function AdBanner({ type = "horizontal", className = "" }: AdBann
 
   // ログインしており、かつ管理者の場合は何も表示しない
   if (user && user.email && adminEmails.includes(user.email)) {
+    return null;
+  }
+
   const [adHtml, setAdHtml] = useState<string>("");
 
   useEffect(() => {
