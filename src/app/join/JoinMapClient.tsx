@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { getMap, MapData } from "@/lib/firebase/firestore";
 import { joinMap } from "@/lib/firebase/firestore";
 import AuthModal from "@/components/AuthModal";
 
 export default function JoinMapClient() {
-  const params = useParams<{ mapId: string }>();
+  const searchParams = useSearchParams();
+  const mapId = searchParams?.get("id");
   const router = useRouter();
   const { user, loading } = useAuth();
   const [mapData, setMapData] = useState<MapData | null>(null);
@@ -19,9 +20,9 @@ export default function JoinMapClient() {
   useEffect(() => {
     // 地図情報の取得
     const fetchMap = async () => {
-      if (!params?.mapId) return;
+      if (!mapId) return;
       try {
-        const data = await getMap(params.mapId);
+        const data = await getMap(mapId);
         if (data) {
           setMapData(data);
         } else {
@@ -32,7 +33,7 @@ export default function JoinMapClient() {
       }
     };
     fetchMap();
-  }, [params?.mapId]);
+  }, [mapId]);
 
   useEffect(() => {
     if (loading) return;
@@ -47,18 +48,18 @@ export default function JoinMapClient() {
   }, [user, loading, mapData]);
 
   const handleJoin = async () => {
-    if (!user || !mapData || !params?.mapId) return;
+    if (!user || !mapData || !mapId) return;
     
     setIsJoining(true);
     try {
       // すでにメンバーかチェック
       if (mapData.members.includes(user.uid)) {
-        router.push(`/map/${params.mapId}`);
+        router.push(`/map?id=${mapId}`);
         return;
       }
 
-      await joinMap(params.mapId, user.uid);
-      router.push(`/map/${params.mapId}`);
+      await joinMap(mapId, user.uid);
+      router.push(`/map?id=${mapId}`);
     } catch (error) {
       console.error(error);
       setErrorMsg("地図への参加に失敗しました。");

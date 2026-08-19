@@ -97,7 +97,7 @@ export default function MapEditModal({ isOpen, onClose, mapData }: MapEditModalP
 
   const handleCopyLink = async () => {
     try {
-      const url = `${window.location.origin}/join/${mapData.id}`;
+      const url = `${window.location.origin}/join?id=${mapData.id}`;
       await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);

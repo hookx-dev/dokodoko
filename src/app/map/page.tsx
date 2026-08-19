@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,10 +12,10 @@ import RecentListView from "@/components/RecentListView";
 const MapComponent = dynamic(() => import("@/components/Map"), { ssr: false });
 const PinListView = dynamic(() => import("@/components/PinListView"), { ssr: false });
 
-export default function MapPage() {
+function MapPageContent() {
   const router = useRouter();
-  const params = useParams<{ mapId: string }>();
-  const mapId = params?.mapId || "default";
+  const searchParams = useSearchParams();
+  const mapId = searchParams?.get("id") || "default";
   const { user, loading: authLoading } = useAuth();
   const [mapData, setMapData] = useState<MapData | null>(null);
   const [userProfiles, setUserProfiles] = useState<Record<string, UserProfile>>({});
@@ -42,7 +42,7 @@ export default function MapPage() {
         
         // ログインしていない、またはメンバーではない場合は join ページへ飛ばす
         if (!user || !data.members.includes(user.uid)) {
-          router.push(`/join/${mapId}`);
+          router.push(`/join?id=${mapId}`);
           return;
         }
         
@@ -188,5 +188,15 @@ export default function MapPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+import { Suspense } from "react";
+
+export default function MapPage() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-white dark:bg-black text-black dark:text-white">Loading...</div>}>
+      <MapPageContent />
+    </Suspense>
   );
 }

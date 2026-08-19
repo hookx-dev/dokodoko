@@ -66,7 +66,7 @@ export default function DashboardPage() {
       setIsCreating(false);
       setNewMapName("");
       // Redirect to the new map
-      router.push(`/map/${mapId}`);
+      router.push(`/map?id=${mapId}`);
     } catch (error) {
       console.error(error);
       alert("地図の作成に失敗しました");
@@ -143,7 +143,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {maps.map((map) => (
               <Link 
-                href={`/map/${map.id}`} 
+                href={`/map?id=${map.id}`} 
                 key={map.id}
                 className="group block bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-slate-200 dark:border-zinc-800 shadow-sm hover:shadow-xl hover:border-indigo-300 dark:hover:border-indigo-500/50 transition-all transform hover:-translate-y-1"
               >

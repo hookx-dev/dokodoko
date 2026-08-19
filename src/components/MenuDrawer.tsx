@@ -38,7 +38,7 @@ export default function MenuDrawer({ mapId, mapData, userProfiles, isOpen, onClo
 
   const handleCopyLink = async () => {
     try {
-      const url = `${window.location.origin}/join/${mapId}`;
+      const url = `${window.location.origin}/join?id=${mapId}`;
       if (navigator.clipboard && navigator.clipboard.writeText) {
         await navigator.clipboard.writeText(url);
       } else {
