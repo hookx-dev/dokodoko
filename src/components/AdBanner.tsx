@@ -21,25 +21,22 @@ export default function AdBanner({ type = "horizontal", className = "" }: AdBann
     return null;
   }
 
-  // --- 以降はプレースホルダー（後日ASPのコードに差し替える） ---
-  const isHorizontal = type === "horizontal";
+  const horizontalAdHtml = `<a href="https://px.a8.net/svt/ejp?a8mat=4BAA98+8V4D0Y+40T2+5Z6WX" rel="nofollow">
+<img border="0" width="468" height="60" alt="" src="https://www25.a8.net/svt/bgt?aid=260820332536&wid=001&eno=01&mid=s00000018767001004000&mc=1"></a>
+<img border="0" width="1" height="1" src="https://www15.a8.net/0.gif?a8mat=4BAA98+8V4D0Y+40T2+5Z6WX" alt="">`;
+
+  const squareAdHtml = `<a href="https://px.a8.net/svt/ejp?a8mat=4BAA98+8V4D0Y+40T2+68MF5" rel="nofollow">
+<img border="0" width="300" height="250" alt="" src="https://www26.a8.net/svt/bgt?aid=260820332536&wid=001&eno=01&mid=s00000018767001048000&mc=1"></a>
+<img border="0" width="1" height="1" src="https://www12.a8.net/0.gif?a8mat=4BAA98+8V4D0Y+40T2+68MF5" alt="">`;
+
+  const adHtml = type === "horizontal" ? horizontalAdHtml : squareAdHtml;
 
   return (
-    <div 
-      className={`bg-slate-100 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-700/50 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 rounded-xl overflow-hidden ${
-        isHorizontal ? "w-full min-h-[100px] sm:min-h-[120px]" : "w-full aspect-square max-w-[300px] mx-auto"
-      } ${className}`}
-    >
-      <span className="text-[10px] font-bold uppercase tracking-widest mb-2 opacity-50">Advertisement</span>
-      <div className="flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-        </svg>
-        <span className="font-medium text-sm">スポンサー広告枠</span>
-      </div>
-      <p className="text-[10px] mt-1 opacity-70 text-center px-4">
-        ※ここにアフィリエイトバナーを設置します
-      </p>
+    <div className={`flex justify-center items-center my-4 overflow-hidden w-full ${className}`}>
+      <div 
+        className="a8-ad-container flex justify-center scale-90 sm:scale-100 origin-center"
+        dangerouslySetInnerHTML={{ __html: adHtml }} 
+      />
     </div>
   );
 }
