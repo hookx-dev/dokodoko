@@ -8,7 +8,6 @@ const withPWA = withPWAInit({
 });
 
 const nextConfig: NextConfig = {
-  output: "export",
   images: { unoptimized: true },
   allowedDevOrigins: ['192.168.1.4'],
   turbopack: {}, // @ducanh2912/next-pwa がwebpack設定を追加するため、Turbopack環境でのエラーを回避
