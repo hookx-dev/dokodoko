@@ -371,12 +371,15 @@ export default function PinForm({ mapId, initialLat, initialLng, initialTitle, i
                 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/50
                 cursor-pointer"
             />
-            {imageFile && (
+            {(imageFile || imageUrl) && (
               <div className="mt-2 relative inline-block">
-                <img src={URL.createObjectURL(imageFile)} alt="Preview" className="h-32 object-cover rounded-md" />
+                <img src={imageFile ? URL.createObjectURL(imageFile) : imageUrl} alt="Preview" className="h-32 object-cover rounded-md" />
                 <button
                   type="button"
-                  onClick={() => setImageFile(null)}
+                  onClick={() => {
+                    if (imageFile) setImageFile(null);
+                    else setImageUrl("");
+                  }}
                   className="absolute top-1 right-1 bg-black/50 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-black/70"
                 >
                   ✕
