@@ -38,16 +38,23 @@ export default function ContactPage() {
     setErrorMessage("");
 
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          access_key: process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY,
+          name: formData.name,
+          email: formData.email,
+          subject: `【DokoDoko お問い合わせ】${formData.subject}`,
+          message: formData.message,
+          from_name: "DokoDoko お問い合わせフォーム",
+        }),
       });
 
       const data = await res.json();
 
-      if (!res.ok) {
-        setErrorMessage(data.error || "送信に失敗しました");
+      if (!data.success) {
+        setErrorMessage(data.message || "送信に失敗しました");
         setStatus("error");
         return;
       }
