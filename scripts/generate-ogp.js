@@ -16,14 +16,14 @@ async function createOgp() {
       }
     });
 
-    // 2. ロゴの読み込みとリサイズ
+    // 2. ロゴの読み込みとリサイズ (枠に収めて透過パディング)
     const logoBuffer = fs.readFileSync('public/logo_full.png');
-    // 高さを200pxにして、下部にテキスト用のスペースを確保
     const logo = await sharp(logoBuffer)
       .resize({
         width: 800,
         height: 200,
-        fit: 'inside',
+        fit: 'contain',
+        background: { r: 0, g: 0, b: 0, alpha: 0 }
       })
       .toBuffer();
 
@@ -39,18 +39,17 @@ async function createOgp() {
             letter-spacing: 2px;
           }
         </style>
-        <text x="50%" y="460" text-anchor="middle" class="title">
+        <text x="50%" y="450" text-anchor="middle" class="title">
           カップルや友達と、思い出の場所を共有しよう
         </text>
       </svg>
     `;
 
-    // 4. 重ね合わせ (ロゴを中心より少し上に配置し、テキストを下に配置)
+    // 4. 重ね合わせ (座標を直接指定)
     await background
       .composite([
-        // ロゴのY座標: 中央(315) - (200/2) - 40(少し上へ) = 175 くらい
-        { input: logo, gravity: 'north', top: 180 }, 
-        { input: Buffer.from(svgText), top: 0, left: 0 }
+        { input: logo, left: 200, top: 170 }, 
+        { input: Buffer.from(svgText), left: 0, top: 0 }
       ])
       .jpeg({ quality: 90 })
       .toFile('public/ogp.jpg');
