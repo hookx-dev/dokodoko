@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
-import { subscribeToUserMaps, MapData, createMap, MapType, getUsersProfiles, UserProfile } from "@/lib/firebase/firestore";
+import { subscribeToUserMaps, MapData, createMap, MapType, getUsersProfiles, UserProfile, removeMemberFromMap } from "@/lib/firebase/firestore";
 import Header from "@/components/Header";
 import MapEditModal from "@/components/MapEditModal";
 import AdBanner from "@/components/AdBanner";
@@ -20,6 +20,7 @@ export default function DashboardPage() {
   const [editingMap, setEditingMap] = useState<MapData | null>(null);
   const [newMapIcon, setNewMapIcon] = useState("🗺️");
   const [userProfiles, setUserProfiles] = useState<Record<string, UserProfile>>({});
+  const [leavingMap, setLeavingMap] = useState<MapData | null>(null);
 
   const AVAILABLE_ICONS = [
     "🗺️", "🎢", "🎳", "🎮",
@@ -107,6 +108,26 @@ export default function DashboardPage() {
     }
   };
 
+  const handleLeaveMapClick = (e: React.MouseEvent, map: MapData) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setLeavingMap(map);
+  };
+
+  const confirmLeaveMap = async () => {
+    if (!user || !leavingMap) return;
+    try {
+      setIsSubmitting(true);
+      await removeMemberFromMap(leavingMap.id, user.uid, leavingMap.members);
+      setLeavingMap(null);
+    } catch (error) {
+      console.error(error);
+      alert("退出に失敗しました");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-white font-sans">
       <Header />
@@ -178,7 +199,7 @@ export default function DashboardPage() {
                     </span>
                   </div>
                   
-                  {map.ownerId === user.uid && (
+                  {map.ownerId === user.uid ? (
                     <button
                       onClick={(e) => handleEditClick(e, map)}
                       className="text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 p-2 rounded-full transition-colors"
@@ -186,6 +207,16 @@ export default function DashboardPage() {
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
+                      </svg>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={(e) => handleLeaveMapClick(e, map)}
+                      className="text-gray-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/30 p-2 rounded-full transition-colors"
+                      title="地図から退出"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
                       </svg>
                     </button>
                   )}
@@ -206,6 +237,45 @@ export default function DashboardPage() {
         onClose={() => setEditingMap(null)}
         mapData={editingMap}
       />
+
+      {/* 退出確認モーダル */}
+      {leavingMap && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm" onClick={() => setLeavingMap(null)}>
+          <div 
+            className="bg-white dark:bg-zinc-900 rounded-2xl p-8 w-full max-w-md shadow-2xl relative animate-in fade-in zoom-in duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex flex-col items-center justify-center text-center">
+              <div className="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 text-orange-600 rounded-full flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-8 h-8">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M22 10.5h-6m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold mb-2">地図から退出しますか？</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">
+                「{leavingMap.name}」のメンバーからあなた自身を削除します。<br/>
+                これ以降、あなたはこの地図にアクセスできなくなります。
+              </p>
+              <div className="flex w-full gap-3">
+                <button
+                  onClick={() => setLeavingMap(null)}
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold transition-colors disabled:opacity-50"
+                >
+                  キャンセル
+                </button>
+                <button
+                  onClick={confirmLeaveMap}
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold shadow-md shadow-orange-500/20 transition-colors disabled:opacity-50"
+                >
+                  {isSubmitting ? "退出中..." : "退出する"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 新規作成モーダル */}
       {isCreating && (

@@ -4,12 +4,13 @@ import { useState } from "react";
 import InfoModal, { InfoType } from "./InfoModal";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
 import { auth } from "@/lib/firebase/config";
 import { signOut } from "firebase/auth";
 import AdBanner from "./AdBanner";
-import { MapData, UserProfile } from "@/lib/firebase/firestore";
+import { MapData, UserProfile, removeMemberFromMap } from "@/lib/firebase/firestore";
 
 interface MenuDrawerProps {
   mapId: string;
@@ -25,7 +26,23 @@ export default function MenuDrawer({ mapId, mapData, userProfiles, isOpen, onClo
   const [copied, setCopied] = useState(false);
   const [infoModalType, setInfoModalType] = useState<InfoType>(null);
 
+  const router = useRouter();
   const { user } = useAuth();
+
+  const handleLeaveMap = async () => {
+    if (!user || !mapData) return;
+    const confirm = window.confirm(`「${mapData.name}」から退出しますか？\n退出するとこの地図にアクセスできなくなります。`);
+    if (!confirm) return;
+    
+    try {
+      await removeMemberFromMap(mapId, user.uid, mapData.members || []);
+      onClose();
+      router.push("/dashboard");
+    } catch (error) {
+      console.error("Leave map error", error);
+      alert("退出に失敗しました");
+    }
+  };
 
   const handleSignOut = async () => {
     try {
@@ -265,6 +282,19 @@ export default function MenuDrawer({ mapId, mapData, userProfiles, isOpen, onClo
                     <span className="font-medium text-sm text-gray-700 dark:text-gray-200">設定</span>
                   </Link>
                 </li>
+                {mapData && mapData.ownerId !== user.uid && (
+                  <li>
+                    <button 
+                      onClick={handleLeaveMap}
+                      className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors text-left group"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-orange-500 group-hover:text-orange-600">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M22 10.5h-6m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
+                      </svg>
+                      <span className="font-medium text-sm text-orange-600 dark:text-orange-400 group-hover:text-orange-700 dark:group-hover:text-orange-300">この地図から退出する</span>
+                    </button>
+                  </li>
+                )}
                 <li>
                   <button 
                     onClick={handleSignOut}
