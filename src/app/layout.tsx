@@ -22,6 +22,15 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   manifest: '/manifest.json',
+  icons: {
+    icon: [
+      { url: '/logo_icon.jpg', type: 'image/jpeg' },
+    ],
+    apple: [
+      { url: '/logo_icon.jpg', type: 'image/jpeg' },
+    ],
+    shortcut: '/logo_icon.jpg',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
