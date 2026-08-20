@@ -37,9 +37,9 @@ export default function Header({ title, type, icon, memberCount }: HeaderProps =
             <Image 
               src="/logo_full.png" 
               alt="DokoDoko Logo" 
-              width={130} 
-              height={36} 
-              className="w-[100px] md:w-[130px] h-auto object-contain"
+              width={160} 
+              height={44} 
+              className="w-[130px] md:w-[160px] h-auto object-contain"
               priority
             />
           </Link>
