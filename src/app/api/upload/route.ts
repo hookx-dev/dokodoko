@@ -2,6 +2,8 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextResponse } from "next/server";
 
+export const runtime = 'edge';
+
 export async function POST(request: Request) {
   try {
     const { filename, contentType } = await request.json();
