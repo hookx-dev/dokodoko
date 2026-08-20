@@ -1,10 +1,16 @@
 import { Resend } from "resend";
 import { NextResponse } from "next/server";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const recipientEmail = process.env.CONTACT_RECIPIENT_EMAIL;
-
 export async function POST(request: Request) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const recipientEmail = process.env.CONTACT_RECIPIENT_EMAIL;
+
+  if (!apiKey) {
+    return NextResponse.json({ error: "メール設定が不完全です" }, { status: 500 });
+  }
+
+  const resend = new Resend(apiKey);
+
   try {
     const { name, email, subject, message } = await request.json();
 
