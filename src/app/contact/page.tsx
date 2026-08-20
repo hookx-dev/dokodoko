@@ -42,7 +42,7 @@ export default function ContactPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          access_key: process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY,
+          access_key: process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY || "157a6086-7b8c-4cca-aa22-23b704b990a1",
           name: formData.name,
           email: formData.email,
           subject: `【DokoDoko お問い合わせ】${formData.subject}`,
