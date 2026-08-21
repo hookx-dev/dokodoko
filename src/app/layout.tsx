@@ -22,6 +22,9 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   manifest: '/manifest.json',
+  other: {
+    'google-adsense-account': 'ca-pub-2809438929408465',
+  },
   icons: {
     icon: [
       { url: '/logo_icon.jpg', type: 'image/jpeg' },
