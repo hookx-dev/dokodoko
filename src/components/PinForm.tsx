@@ -2,9 +2,11 @@
 /* eslint-disable react-hooks/exhaustive-deps, @next/next/no-img-element */
 
 import { useState, useEffect } from "react";
-import { addPin, updatePin, deletePin, PinStatus, PinCategory, Pin } from "@/lib/firebase/firestore";
+import { addPin, updatePin, deletePin, PinStatus, PinCategory, Pin, getMap, getUserPlan, getWantToGoPinStats } from "@/lib/firebase/firestore";
 import { uploadPinImage } from "@/lib/cloudflare/r2";
 import { useAuth } from "@/contexts/AuthContext";
+import { canAddWantToGoPin, FREE_PLAN_LIMITS } from "@/lib/plan";
+import { useRouter } from "next/navigation";
 import { SearchBox } from "@mapbox/search-js-react";
 
 interface PinFormProps {
@@ -20,6 +22,7 @@ interface PinFormProps {
 
 export default function PinForm({ mapId, initialLat, initialLng, initialTitle, initialAddress, existingPin, onSuccess, onCancel }: PinFormProps) {
   const { user } = useAuth();
+  const router = useRouter();
   
   // State for all fields
   const [title, setTitle] = useState("");
@@ -99,6 +102,30 @@ export default function PinForm({ mapId, initialLat, initialLng, initialTitle, i
     if (internalLat === null || internalLng === null) {
       alert("場所の位置情報（緯度経度）が取得できませんでした。検索から選択するか、地図から再度お試しください。");
       return;
+    }
+
+    // 無料プランの「行きたい」ピン上限チェック（新規追加のみ対象）
+    if (!existingPin && status === "want_to_go") {
+      try {
+        const mapData = await getMap(mapId);
+        if (mapData) {
+          const ownerPlan = await getUserPlan(mapData.ownerId);
+          const { activeCount, addedTodayCount } = await getWantToGoPinStats(mapId);
+          const result = canAddWantToGoPin(ownerPlan, activeCount, addedTodayCount);
+          if (!result.allowed) {
+            const message =
+              result.reason === "daily_limit"
+                ? `無料プランでは「行きたい」の新規追加は1日${FREE_PLAN_LIMITS.maxNewWantToGoPinsPerDay}件までです。プレミアムプランなら無制限に追加できます。`
+                : `無料プランでは「行きたい」を同時に${FREE_PLAN_LIMITS.maxActiveWantToGoPins}件までしか保持できません。プレミアムプランなら無制限に保持できます。`;
+            if (window.confirm(`${message}\n\nプラン一覧を見ますか？`)) {
+              router.push("/pricing");
+            }
+            return;
+          }
+        }
+      } catch (error) {
+        console.error("Failed to check plan limits", error);
+      }
     }
 
     try {

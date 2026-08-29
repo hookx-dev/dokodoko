@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { getMap, MapData } from "@/lib/firebase/firestore";
+import { getMap, MapData, getUserPlan } from "@/lib/firebase/firestore";
 import { joinMap } from "@/lib/firebase/firestore";
+import { canJoinMap, FREE_PLAN_LIMITS } from "@/lib/plan";
 import AuthModal from "@/components/AuthModal";
 
 export default function JoinMapClient() {
@@ -55,6 +56,15 @@ export default function JoinMapClient() {
       // すでにメンバーかチェック
       if (mapData.members.includes(user.uid)) {
         router.push(`/map?id=${mapId}`);
+        return;
+      }
+
+      const ownerPlan = await getUserPlan(mapData.ownerId);
+      if (!canJoinMap(ownerPlan, mapData.members.length)) {
+        setErrorMsg(
+          `このマップのオーナーが無料プランのため、メンバーは${FREE_PLAN_LIMITS.maxMembersPerMap}人までしか参加できません。オーナーにプレミアムプランへのアップグレードを依頼してください。`
+        );
+        setIsJoining(false);
         return;
       }
 

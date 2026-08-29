@@ -3,10 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { 
-  updateUserProfile, 
-  updateUserEmail, 
-  updateUserPassword, 
+import { usePlan } from "@/hooks/usePlan";
+import { PREMIUM_PRICE_JPY } from "@/lib/plan";
+import {
+  updateUserProfile,
+  updateUserEmail,
+  updateUserPassword,
   reauthenticate,
   deleteAccount
 } from "@/lib/firebase/auth";
@@ -16,7 +18,9 @@ import { useRef } from "react";
 
 export default function SettingsPage() {
   const { user, loading, reloadUser } = useAuth();
+  const { plan, subscriptionStatus } = usePlan();
   const router = useRouter();
+  const [isPlanActionLoading, setIsPlanActionLoading] = useState(false);
 
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
@@ -156,6 +160,46 @@ export default function SettingsPage() {
     }
   };
 
+  const handleUpgrade = async () => {
+    if (!user) return;
+    try {
+      setIsPlanActionLoading(true);
+      const idToken = await user.getIdToken();
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+      });
+      if (!res.ok) throw new Error("Failed to create checkout session");
+      const { url } = await res.json();
+      if (url) window.location.href = url;
+    } catch (err) {
+      console.error(err);
+      showStatus('error', '決済ページの作成に失敗しました。');
+    } finally {
+      setIsPlanActionLoading(false);
+    }
+  };
+
+  const handleManagePlan = async () => {
+    if (!user) return;
+    try {
+      setIsPlanActionLoading(true);
+      const idToken = await user.getIdToken();
+      const res = await fetch("/api/stripe/portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+      });
+      if (!res.ok) throw new Error("Failed to create portal session");
+      const { url } = await res.json();
+      if (url) window.location.href = url;
+    } catch (err) {
+      console.error(err);
+      showStatus('error', 'プラン管理画面の作成に失敗しました。');
+    } finally {
+      setIsPlanActionLoading(false);
+    }
+  };
+
   const handleDeleteAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -209,6 +253,50 @@ export default function SettingsPage() {
         )}
 
         <div className="space-y-8">
+          {/* プラン設定 */}
+          <section className="bg-white dark:bg-zinc-900 shadow-sm border border-slate-200 dark:border-zinc-800 rounded-3xl overflow-hidden">
+            <div className="px-6 py-5 border-b border-slate-100 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/50 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">ご利用プラン</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">現在のプランと課金状況を確認・変更します</p>
+              </div>
+            </div>
+            <div className="px-6 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <p className="text-lg font-bold text-slate-800 dark:text-slate-100">
+                  {plan === "premium" ? "プレミアムプラン" : "フリープラン"}
+                </p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                  {plan === "premium"
+                    ? `月額¥${PREMIUM_PRICE_JPY}${subscriptionStatus === "active" ? "・利用中" : ""}`
+                    : "地図の作成数・招待人数・ピン数に制限があります"}
+                </p>
+              </div>
+              {plan === "premium" ? (
+                <button
+                  onClick={handleManagePlan}
+                  disabled={isPlanActionLoading}
+                  className="px-6 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold transition-all disabled:opacity-50"
+                >
+                  {isPlanActionLoading ? "処理中..." : "プランを管理する"}
+                </button>
+              ) : (
+                <button
+                  onClick={handleUpgrade}
+                  disabled={isPlanActionLoading}
+                  className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-500/20 transition-all disabled:opacity-50"
+                >
+                  {isPlanActionLoading ? "処理中..." : "プレミアムにアップグレード"}
+                </button>
+              )}
+            </div>
+          </section>
+
           {/* プロフィール設定 */}
           <section className="bg-white dark:bg-zinc-900 shadow-sm border border-slate-200 dark:border-zinc-800 rounded-3xl overflow-hidden">
             <div className="px-6 py-5 border-b border-slate-100 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/50 flex items-center gap-4">

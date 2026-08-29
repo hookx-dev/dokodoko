@@ -57,10 +57,17 @@ const USERS_COLLECTION = "users";
 // Users Operations
 // ==========================================
 
+export type UserPlan = "free" | "premium";
+export type SubscriptionStatus = "active" | "canceled" | "past_due" | "incomplete";
+
 export interface UserProfile {
   uid: string;
   displayName: string | null;
   photoURL: string | null;
+  plan?: UserPlan;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  subscriptionStatus?: SubscriptionStatus;
 }
 
 export const updateUserDocument = async (uid: string, data: Partial<Omit<UserProfile, "uid">>) => {
@@ -74,6 +81,22 @@ export const updateUserDocument = async (uid: string, data: Partial<Omit<UserPro
   } catch (error) {
     console.error("Error updating user document: ", error);
     throw error;
+  }
+};
+
+export const getUserPlan = async (uid: string): Promise<UserPlan> => {
+  try {
+    const userRef = doc(db, USERS_COLLECTION, uid);
+    const snap = await getDoc(userRef);
+    if (!snap.exists()) return "free";
+    const data = snap.data();
+    if (data.plan === "premium" && data.subscriptionStatus === "active") {
+      return "premium";
+    }
+    return "free";
+  } catch (error) {
+    console.error("Error getting user plan: ", error);
+    return "free";
   }
 };
 
@@ -267,6 +290,34 @@ export const deletePin = async (id: string) => {
   } catch (error) {
     console.error("Error deleting pin: ", error);
     throw error;
+  }
+};
+
+export const getWantToGoPinStats = async (
+  mapId: string
+): Promise<{ activeCount: number; addedTodayCount: number }> => {
+  try {
+    const pinsRef = collection(db, COLLECTION_NAME);
+    const q = query(pinsRef, where("mapId", "==", mapId), where("status", "==", "want_to_go"));
+    const snapshot = await getDocs(q);
+    const now = new Date();
+    let addedTodayCount = 0;
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      const createdAt = data.createdAt ? (data.createdAt as Timestamp).toDate() : null;
+      if (
+        createdAt &&
+        createdAt.getFullYear() === now.getFullYear() &&
+        createdAt.getMonth() === now.getMonth() &&
+        createdAt.getDate() === now.getDate()
+      ) {
+        addedTodayCount += 1;
+      }
+    });
+    return { activeCount: snapshot.size, addedTodayCount };
+  } catch (error) {
+    console.error("Error getting want-to-go pin stats: ", error);
+    return { activeCount: 0, addedTodayCount: 0 };
   }
 };
 

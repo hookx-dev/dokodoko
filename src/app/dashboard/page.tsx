@@ -5,15 +5,19 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { subscribeToUserMaps, MapData, createMap, MapType, getUsersProfiles, UserProfile, removeMemberFromMap } from "@/lib/firebase/firestore";
+import { usePlan } from "@/hooks/usePlan";
+import { canCreateMap, FREE_PLAN_LIMITS } from "@/lib/plan";
 import Header from "@/components/Header";
 import MapEditModal from "@/components/MapEditModal";
 import AdBanner from "@/components/AdBanner";
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
+  const { plan } = usePlan();
   const router = useRouter();
   const [maps, setMaps] = useState<MapData[]>([]);
   const [isCreating, setIsCreating] = useState(false);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [newMapName, setNewMapName] = useState("");
   const [newMapType, setNewMapType] = useState<MapType>("personal");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,6 +58,11 @@ export default function DashboardPage() {
   const handleCreateMap = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !newMapName.trim()) return;
+    if (!canCreateMap(plan, maps.length)) {
+      setIsCreating(false);
+      setShowUpgradePrompt(true);
+      return;
+    }
 
     try {
       setIsSubmitting(true);
@@ -74,6 +83,14 @@ export default function DashboardPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleOpenCreate = () => {
+    if (!canCreateMap(plan, maps.length)) {
+      setShowUpgradePrompt(true);
+      return;
+    }
+    setIsCreating(true);
   };
 
   const handleEditClick = (e: React.MouseEvent, map: MapData) => {
@@ -139,7 +156,7 @@ export default function DashboardPage() {
             <p className="text-slate-500 dark:text-slate-400 mt-2">あなたの地図一覧</p>
           </div>
           <button
-            onClick={() => setIsCreating(true)}
+            onClick={handleOpenCreate}
             className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-bold shadow-md shadow-indigo-500/20 transform hover:-translate-y-0.5 transition-all flex items-center gap-2"
           >
             <span>+</span> 新しい地図を作る
@@ -154,7 +171,7 @@ export default function DashboardPage() {
               右上のボタンから新しい地図を作成して、思い出の場所を記録し始めましょう。
             </p>
             <button
-              onClick={() => setIsCreating(true)}
+              onClick={handleOpenCreate}
               className="px-8 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-bold hover:opacity-90 transition-opacity"
             >
               最初の地図を作る
@@ -325,6 +342,41 @@ export default function DashboardPage() {
                 {isSubmitting ? "作成中..." : "作成する"}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* 無料プラン上限アップグレード誘導モーダル */}
+      {showUpgradePrompt && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm" onClick={() => setShowUpgradePrompt(false)}>
+          <div
+            className="bg-white dark:bg-zinc-900 rounded-2xl p-8 w-full max-w-md shadow-2xl relative animate-in fade-in zoom-in duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex flex-col items-center justify-center text-center">
+              <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-full flex items-center justify-center mb-4 text-3xl">
+                ✨
+              </div>
+              <h3 className="text-xl font-bold mb-2">無料プランの上限に達しました</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">
+                無料プランでは地図は{FREE_PLAN_LIMITS.maxMaps}つまで作成できます。<br />
+                プレミアムプランにアップグレードすると、地図をいくつでも作成できます。
+              </p>
+              <div className="flex w-full gap-3">
+                <button
+                  onClick={() => setShowUpgradePrompt(false)}
+                  className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold transition-colors"
+                >
+                  閉じる
+                </button>
+                <Link
+                  href="/pricing"
+                  className="flex-1 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-md shadow-indigo-500/20 transition-colors text-center"
+                >
+                  プランを見る
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       )}
