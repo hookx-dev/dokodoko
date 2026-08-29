@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /dashboard
+Disallow: /map
+Disallow: /join
+Disallow: /settings
+Disallow: /reset-password
+Allow: /
+
+Sitemap: https://dokodoko.pages.dev/sitemap.xml
