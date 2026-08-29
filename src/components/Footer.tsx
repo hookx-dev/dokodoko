@@ -15,6 +15,9 @@ export default function Footer() {
           </div>
           
           <div className="flex justify-center space-x-6 md:order-2">
+            <Link href="/faq" className="text-sm text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
+              よくある質問
+            </Link>
             <Link href="/terms" className="text-sm text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
               利用規約
             </Link>
