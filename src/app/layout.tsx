@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   },
   metadataBase: new URL('https://dokodoko.pages.dev'),
   title: 'DokoDoko - カップルや友達と思い出の場所を共有するプライベートマップアプリ',
-  description: 'カップルのデートプラン作りや友人との旅行計画に最適！一緒に行きたい場所や思い出のスポットをGoogleマップ上にピン留めしてリアルタイム共有できる、招待制の完全無料マップ作成アプリです。',
+  description: 'カップルのデートプラン作りや友人との旅行計画に最適！一緒に行きたい場所や思い出のスポットをGoogleマップ上にピン留めしてリアルタイム共有できる、招待制のマップ作成アプリです。無料プランからすぐに始められます。',
   openGraph: {
     title: 'DokoDoko - カップルや友達とつくる共有マップ',
     description: 'デートプランや旅行計画を地図で共有。行きたい場所や思い出のスポットをみんなでピン留めしよう！',

@@ -60,19 +60,25 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mt-8 mb-4">第6条（アクセス解析ツールについて）</h2>
+            <h2 className="text-2xl font-semibold mt-8 mb-4">第6条（決済情報の取扱いについて）</h2>
+            <p>有料プラン（プレミアムプラン）のお申し込みにあたり、ユーザーが入力したクレジットカード情報等の決済情報は、当サービスのサーバーには保存されません。決済処理は決済代行会社であるStripe, Inc.が提供するサービスを通じて行われ、Stripe社のプライバシーポリシーに基づき管理されます。当サービスは、決済の完了有無やご契約状況（プラン種別、契約状態等）の情報のみをStripe社から受け取り、サービス提供のために利用します。</p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-semibold mt-8 mb-4">第7条（アクセス解析ツールについて）</h2>
             <p>当サービスでは、サービス向上のためGoogle Analytics等のアクセス解析ツールを使用しています。これらのツールはトラフィックデータの収集のためにCookieを使用しています。このトラフィックデータは匿名で収集されており、個人を特定するものではありません。この機能はCookieを無効にすることで収集を拒否することが出来ますので、お使いのブラウザの設定をご確認ください。</p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold mt-8 mb-4">第7条（プライバシーポリシーの変更）</h2>
+            <h2 className="text-2xl font-semibold mt-8 mb-4">第8条（プライバシーポリシーの変更）</h2>
             <p>1. 本ポリシーの内容は、法令その他本ポリシーに別段の定めのある事項を除いて、ユーザーに通知することなく、変更することができるものとします。</p>
             <p>2. 当サービスが別途定める場合を除いて、変更後のプライバシーポリシーは、本ウェブサイトに掲載したときから効力を生じるものとします。</p>
           </section>
 
           <p className="mt-12 text-right text-sm text-slate-500">
             以上<br />
-            制定日：2026年8月19日
+            制定日：2026年8月19日<br />
+            改定日：2026年8月30日
           </p>
         </div>
       </main>

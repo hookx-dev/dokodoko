@@ -30,6 +30,9 @@ export default function Footer() {
             <Link href="/contact" className="text-sm text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
               お問い合わせ
             </Link>
+            <Link href="/tokushoho" className="text-sm text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
+              特定商取引法に基づく表記
+            </Link>
           </div>
         </div>
         

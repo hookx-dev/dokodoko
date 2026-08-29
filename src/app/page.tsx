@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import AuthModal from "@/components/AuthModal";
@@ -80,6 +81,9 @@ export default function LandingPage() {
               <a href="#how-to-use" onClick={(e) => scrollToSection(e, 'how-to-use')} className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors">
                 使い方
               </a>
+              <Link href="/pricing" className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors">
+                料金プラン
+              </Link>
               <button
                 onClick={handleStart}
                 className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-bold text-sm shadow-md shadow-indigo-500/20 transform hover:-translate-y-0.5 transition-all duration-200"
@@ -124,7 +128,7 @@ export default function LandingPage() {
             
             <p className="mt-6 text-lg md:text-xl text-slate-800 dark:text-slate-200 max-w-2xl mx-auto leading-relaxed font-medium">
               週末のデートプラン作り、友達との旅行計画、そして大切な人との思い出の記録に。
-              「DokoDoko」は、行きたい場所をGoogleマップ上にピン留めしてリアルタイムに共有できる、完全無料のプライベート地図アプリです。
+              「DokoDoko」は、行きたい場所をGoogleマップ上にピン留めしてリアルタイムに共有できる、無料から始められるプライベート地図アプリです。
             </p>
             
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -154,9 +158,9 @@ export default function LandingPage() {
               <div className="w-14 h-14 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center mb-6 transform group-hover:-translate-y-2 transition-transform">
                 <span className="text-3xl">🤝</span>
               </div>
-              <h3 className="text-xl font-bold mb-3">誰とでも、いくつでも共有</h3>
+              <h3 className="text-xl font-bold mb-3">誰とでも、目的別に共有</h3>
               <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                旅行仲間との共有マップ、恋人とのデートスポットまとめ、自分だけの秘密のカフェリストなど、目的別に複数の地図を作成できます。
+                旅行仲間との共有マップ、恋人とのデートスポットまとめ、自分だけの秘密のカフェリストなど、目的別に地図を作成できます（無料プランは2つまで、プレミアムなら無制限）。
               </p>
             </div>
 
