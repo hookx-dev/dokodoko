@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ユーザープロフィールのルール
+    match /users/{userId} {
+      allow read: if true;
+
+      // plan/subscriptionStatus/stripeCustomerId等はクライアントから書き込み不可。
+      // Stripe Webhook（サービスアカウントのOAuth2トークン経由）はこのルールの対象外なので、
+      // Firestore REST APIによる管理者アクセスは引き続き成功する。
+      allow create: if request.auth != null && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly(['displayName', 'photoURL']);
+
+      allow update: if request.auth != null && request.auth.uid == userId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'photoURL']);
+    }
+
+    // マップのルール
+    match /maps/{mapId} {
+      allow get: if true;
+      allow list: if request.auth != null && (request.auth.uid in resource.data.members);
+
+      // 作成時はownerId・membersの偽装を禁止（自分だけが唯一のメンバーとして作成）
+      allow create: if request.auth != null
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.members.size() == 1
+        && request.resource.data.members[0] == request.auth.uid;
+
+      // 更新は、自分がすでにメンバーであるか、新しくメンバーになろうとしている場合のみ許可。
+      // ownerIdの書き換えは禁止。メンバーを増やす場合、オーナーが無料プランなら2人までに制限。
+      allow update: if request.auth != null && (
+          (request.auth.uid in resource.data.members) ||
+          (request.auth.uid in request.resource.data.members)
+        )
+        && request.resource.data.ownerId == resource.data.ownerId
+        && (
+          request.resource.data.members.size() <= resource.data.members.size()
+          || request.resource.data.members.size() <= 2
+          || (
+            exists(/databases/$(database)/documents/users/$(resource.data.ownerId))
+            && get(/databases/$(database)/documents/users/$(resource.data.ownerId)).data.get('plan', 'free') == 'premium'
+          )
+        );
+
+      // 削除はメンバーのみ許可
+      allow delete: if request.auth != null && (request.auth.uid in resource.data.members);
+    }
+
+    // ピン（スポット）のルール：所属する地図のメンバーのみ読み書き可能
+    match /pins/{pinId} {
+      allow read: if request.auth != null
+        && request.auth.uid in get(/databases/$(database)/documents/maps/$(resource.data.mapId)).data.members;
+
+      allow create: if request.auth != null
+        && request.resource.data.authorId == request.auth.uid
+        && request.auth.uid in get(/databases/$(database)/documents/maps/$(request.resource.data.mapId)).data.members;
+
+      allow update, delete: if request.auth != null
+        && request.auth.uid in get(/databases/$(database)/documents/maps/$(resource.data.mapId)).data.members;
+    }
+  }
+}
