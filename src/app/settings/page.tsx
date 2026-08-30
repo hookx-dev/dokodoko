@@ -13,6 +13,7 @@ import {
   deleteAccount
 } from "@/lib/firebase/auth";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import Link from "next/link";
 import { useRef } from "react";
 
@@ -524,6 +525,8 @@ export default function SettingsPage() {
 
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { subscribeToUserMaps, MapData, createMap, MapType, getUsersProfiles, Use
 import { usePlan } from "@/hooks/usePlan";
 import { canCreateMap, FREE_PLAN_LIMITS } from "@/lib/plan";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import MapEditModal from "@/components/MapEditModal";
 import AdBanner from "@/components/AdBanner";
 
@@ -248,6 +249,8 @@ export default function DashboardPage() {
           <AdBanner type="horizontal" />
         </div>
       </main>
+
+      <Footer />
 
       <MapEditModal
         isOpen={!!editingMap}
