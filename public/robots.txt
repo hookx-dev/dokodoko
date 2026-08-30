@@ -1,7 +1,6 @@
 User-agent: *
 Disallow: /dashboard
 Disallow: /map
-Disallow: /join
 Disallow: /settings
 Disallow: /reset-password
 Allow: /
