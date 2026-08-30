@@ -8,10 +8,10 @@ export const metadata: Metadata = {
 };
 
 const rows: { label: string; value: string }[] = [
-  { label: "販売事業者", value: "Hookx Dev（個人事業主）" },
+  { label: "販売事業者", value: "野崎翔太（個人事業主）" },
   {
     label: "運営統括責任者",
-    value: "請求があれば遅滞なく開示いたします。お問い合わせフォームよりご請求ください。",
+    value: "野崎翔太",
   },
   {
     label: "所在地",
