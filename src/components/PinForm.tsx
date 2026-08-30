@@ -150,7 +150,7 @@ export default function PinForm({ mapId, initialLat, initialLng, initialTitle, i
       
       const pinData: Partial<Pin> = {
         mapId,
-        title,
+        title: title.trim() || address.trim() || "名称未設定の場所",
         status,
         category,
         latitude: internalLat,
@@ -284,14 +284,13 @@ export default function PinForm({ mapId, initialLat, initialLng, initialTitle, i
 
           {/* 店名/タイトル */}
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">店名・スポット名（必須）</label>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">店名・スポット名（任意）</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              required
               className="w-full border border-gray-300 dark:border-gray-700 rounded-md p-2 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="例: 初デートで行ったカフェ"
+              placeholder="例: 初デートで行ったカフェ（空欄可）"
             />
           </div>
 
@@ -462,7 +461,7 @@ export default function PinForm({ mapId, initialLat, initialLng, initialTitle, i
         <button
           type="submit"
           form="pin-form"
-          disabled={loading || !title.trim()}
+          disabled={loading}
           className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-3 rounded-md transition-colors disabled:opacity-50"
         >
           {uploadProgress > 0 && uploadProgress < 100 ? "画像アップロード中..." : loading ? "保存中..." : "保存する"}

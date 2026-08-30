@@ -176,6 +176,22 @@ export default function MapComponent({ mapId, targetLocation, onCenterChange }: 
     const { lng, lat } = evt.lngLat;
     setTemporaryPin({ lat, lng });
     setSelectedPinId(null);
+
+    // クリックした地点の住所を逆ジオコーディングで自動取得
+    if (mapboxToken) {
+      fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxToken}&language=ja&limit=1`
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          const address = data?.features?.[0]?.place_name as string | undefined;
+          if (!address) return;
+          setTemporaryPin((prev) =>
+            prev && prev.lat === lat && prev.lng === lng ? { ...prev, address } : prev
+          );
+        })
+        .catch((err) => console.error("Reverse geocoding failed", err));
+    }
   };
 
 
