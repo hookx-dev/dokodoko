@@ -13,9 +13,9 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug } = params;
   const article = getColumnArticle(slug);
   if (!article) return {};
 
@@ -34,12 +34,12 @@ export async function generateMetadata({
   };
 }
 
-export default async function ColumnArticlePage({
+export default function ColumnArticlePage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 }) {
-  const { slug } = await params;
+  const { slug } = params;
   const article = getColumnArticle(slug);
   if (!article) notFound();
 

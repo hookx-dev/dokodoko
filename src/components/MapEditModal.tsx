@@ -1,5 +1,4 @@
 "use client";
-/* eslint-disable react-hooks/set-state-in-effect */
 
 import { useState, useEffect } from "react";
 import { MapData, MapType, updateMap, deleteMap, removeMemberFromMap, getUsersProfiles, UserProfile } from "@/lib/firebase/firestore";

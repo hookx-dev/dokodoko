@@ -17,11 +17,6 @@ export default function AdBanner({ type = "horizontal", className = "" }: AdBann
     ? process.env.NEXT_PUBLIC_ADMIN_EMAILS.split(",").map(e => e.trim())
     : []; // 開発中に追加したい場合はここに ["youremail@example.com"] を追加してもOK
 
-  // ログインしており、かつ管理者の場合は何も表示しない
-  if (user && user.email && adminEmails.includes(user.email)) {
-    return null;
-  }
-
   const [adHtml, setAdHtml] = useState<string>("");
 
   useEffect(() => {
@@ -65,6 +60,11 @@ export default function AdBanner({ type = "horizontal", className = "" }: AdBann
     const randomAd = ads[Math.floor(Math.random() * ads.length)];
     setAdHtml(randomAd);
   }, [type]);
+
+  // ログインしており、かつ管理者の場合は何も表示しない
+  if (user && user.email && adminEmails.includes(user.email)) {
+    return null;
+  }
 
   if (!adHtml) return <div className={`flex justify-center items-center my-4 overflow-hidden w-full min-h-[50px] ${className}`}></div>;
 

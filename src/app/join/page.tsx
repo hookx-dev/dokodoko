@@ -33,10 +33,9 @@ async function fetchDocFields(path: string): Promise<Record<string, FirestoreVal
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ id?: string }>;
+  searchParams: { id?: string };
 }): Promise<Metadata> {
-  const params = await searchParams;
-  const mapId = params?.id;
+  const mapId = searchParams?.id;
   if (!mapId) return fallbackMetadata;
 
   const mapFields = await fetchDocFields(`maps/${mapId}`);
