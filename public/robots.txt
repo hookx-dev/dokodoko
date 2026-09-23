@@ -3,6 +3,7 @@ Disallow: /dashboard
 Disallow: /map
 Disallow: /settings
 Disallow: /reset-password
+Disallow: /join
 Allow: /
 
 Sitemap: https://dokodoko.pages.dev/sitemap.xml

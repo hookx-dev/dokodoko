@@ -21,6 +21,9 @@ export default function Footer() {
             <Link href="/faq" className="text-sm text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
               よくある質問
             </Link>
+            <Link href="/column" className="text-sm text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
+              コラム
+            </Link>
             <Link href="/terms" className="text-sm text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
               利用規約
             </Link>
