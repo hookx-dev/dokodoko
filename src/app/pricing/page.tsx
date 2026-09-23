@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePlan } from "@/hooks/usePlan";
 import { FREE_PLAN_LIMITS, PREMIUM_PRICE_JPY } from "@/lib/plan";
+import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AuthModal from "@/components/AuthModal";
+import { getColumnArticle } from "@/lib/columnArticles";
 
 export default function PricingPage() {
   const { user } = useAuth();
@@ -142,6 +144,26 @@ export default function PricingPage() {
         <p className="text-center text-xs text-slate-400 dark:text-slate-600 mt-10">
           いつでもマイページの「アカウント設定」からキャンセルできます。決済はStripeを通じて安全に処理されます。
         </p>
+
+        <div className="mt-20 max-w-3xl mx-auto">
+          <h2 className="text-lg font-bold mb-6">関連記事</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[getColumnArticle("memory-record-tips"), getColumnArticle("goshuin-camp-map")]
+              .filter((a): a is NonNullable<typeof a> => Boolean(a))
+              .map((article) => (
+                <Link
+                  key={article.slug}
+                  href={`/column/${article.slug}`}
+                  className="block bg-slate-50 dark:bg-zinc-900 rounded-2xl p-5 border border-slate-100 dark:border-zinc-800 hover:shadow-lg transition-shadow"
+                >
+                  <p className="text-xs text-indigo-600 dark:text-indigo-400 font-bold mb-1">
+                    {article.category}
+                  </p>
+                  <p className="font-bold text-sm">{article.title}</p>
+                </Link>
+              ))}
+          </div>
+        </div>
       </main>
 
       <Footer />

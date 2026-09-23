@@ -1,6 +1,8 @@
 import { Metadata } from "next";
+import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { getColumnArticle } from "@/lib/columnArticles";
 
 export const metadata: Metadata = {
   title: "よくある質問 - DokoDoko",
@@ -136,6 +138,26 @@ export default function FaqPage() {
           >
             お問い合わせフォームへ
           </a>
+        </div>
+
+        <div className="mt-16">
+          <h2 className="text-lg font-bold mb-6">関連記事</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[getColumnArticle("date-spot-selection"), getColumnArticle("travel-itinerary-map")]
+              .filter((a): a is NonNullable<typeof a> => Boolean(a))
+              .map((article) => (
+                <Link
+                  key={article.slug}
+                  href={`/column/${article.slug}`}
+                  className="block bg-slate-50 dark:bg-zinc-900 rounded-2xl p-5 border border-slate-100 dark:border-zinc-800 hover:shadow-lg transition-shadow"
+                >
+                  <p className="text-xs text-indigo-600 dark:text-indigo-400 font-bold mb-1">
+                    {article.category}
+                  </p>
+                  <p className="font-bold text-sm">{article.title}</p>
+                </Link>
+              ))}
+          </div>
         </div>
       </main>
 

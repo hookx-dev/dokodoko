@@ -84,6 +84,9 @@ export default function LandingPage() {
               <Link href="/pricing" className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors">
                 料金プラン
               </Link>
+              <Link href="/column" className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors">
+                コラム
+              </Link>
               <button
                 onClick={handleStart}
                 className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-bold text-sm shadow-md shadow-indigo-500/20 transform hover:-translate-y-0.5 transition-all duration-200"
