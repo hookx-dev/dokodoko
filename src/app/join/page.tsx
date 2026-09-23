@@ -2,6 +2,8 @@ import { Metadata } from "next";
 import { Suspense } from "react";
 import JoinMapClient from "./JoinMapClient";
 
+export const runtime = "edge";
+
 const SITE_URL = "https://dokodoko.pages.dev";
 
 const fallbackMetadata: Metadata = {
